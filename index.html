@@ -14,36 +14,78 @@
     :root{ --bg:#0b1320; --card:#0f1a2b; --ink:#e5f2ff; --muted:#9fb3c8; --accent:#38bdf8; --accent-2:#0ea5e9; --ring:rgba(56,189,248,.35); }
   }
   *{box-sizing:border-box}
-  body{ margin:0; font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial;
-        color:var(--ink); background:
-        radial-gradient(1200px 600px at 10% -10%, rgba(56,189,248,.12), transparent 70%),
-        radial-gradient(900px 500px at 120% 10%, rgba(14,165,233,.10), transparent 70%), var(--bg);
-        display:flex; align-items:center; justify-content:center; padding:24px;}
+  body{
+    margin:0;
+    font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 600px at 10% -10%, rgba(56,189,248,.12), transparent 70%),
+      radial-gradient(900px 500px at 120% 10%, rgba(14,165,233,.10), transparent 70%),
+      var(--bg);
+    display:flex; align-items:center; justify-content:center; padding:24px;
+  }
   .shell{width:100%; max-width:980px}
-  .card{background:var(--card); border-radius:18px; box-shadow:0 8px 30px rgba(2,12,27,.12); overflow:hidden; border:1px solid rgba(2,12,27,.06)}
-  .header{padding:18px 20px; display:flex; justify-content:space-between; align-items:center; gap:12px; border-bottom:1px solid rgba(2,12,27,.06)}
+  .card{
+    background:var(--card);
+    border-radius:18px;
+    box-shadow:0 8px 30px rgba(2,12,27,.12);
+    overflow:hidden;
+    border:1px solid rgba(2,12,27,.06);
+  }
+  .header{
+    padding:18px 20px;
+    display:flex; justify-content:space-between; align-items:center; gap:12px;
+    border-bottom:1px solid rgba(2,12,27,.06);
+  }
   .content{padding:18px; display:grid; gap:18px}
   .grid{display:grid; gap:14px}
   @media (min-width:900px){ .grid{grid-template-columns: 1.2fr 1fr} }
-  .panel{border:1px solid rgba(2,12,27,.08); border-radius:14px; padding:16px; background:linear-gradient(180deg, rgba(56,189,248,.07), transparent 45%), var(--card)}
+  .panel{
+    border:1px solid rgba(2,12,27,.08);
+    border-radius:14px;
+    padding:16px;
+    background:linear-gradient(180deg, rgba(56,189,248,.07), transparent 45%), var(--card)
+  }
   h2{margin:.1rem 0 .75rem; font-size:1rem}
   label{font-size:.92rem; color:var(--muted)}
   select, input[type="number"]{
-    width:100%; padding:12px; font-size:1rem; border-radius:10px; border:1px solid rgba(2,12,27,.15);
+    width:100%; padding:12px; font-size:1rem;
+    border-radius:10px; border:1px solid rgba(2,12,27,.15);
     background:var(--card); color:var(--ink); outline:none;
   }
-  select:focus, input[type="number"]:focus{ border-color:var(--accent-2); box-shadow:0 0 0 6px var(--ring) }
+  select:focus, input[type="number"]:focus{
+    border-color:var(--accent-2);
+    box-shadow:0 0 0 6px var(--ring);
+  }
   .row{display:grid; gap:10px}
   .row2{display:grid; gap:10px; grid-template-columns:1fr 1fr}
   .muted{color:var(--muted)}
-  .stat{border:1px dashed rgba(2,12,27,.18); padding:12px; border-radius:12px; display:flex; justify-content:space-between; align-items:baseline; gap:12px}
-  .small{font-size:.84rem; color:var(--muted)}
-  .foot{padding:12px 18px; border-top:1px solid rgba(2,12,27,.06); display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap}
-  .btn{
-    appearance:none; border:1px solid rgba(2,12,27,.18); background:var(--card);
-    padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:600;
+  .stat{
+    border:1px dashed rgba(2,12,27,.18);
+    padding:12px;
+    border-radius:12px;
+    display:flex; justify-content:space-between; align-items:baseline; gap:12px;
   }
-  .btn.primary{border-color:transparent; background:linear-gradient(180deg,var(--accent),var(--accent-2)); color:white}
+  .small{font-size:.84rem; color:var(--muted)}
+  .foot{
+    padding:12px 18px;
+    border-top:1px solid rgba(2,12,27,.06);
+    display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  }
+  .btn{
+    appearance:none;
+    border:1px solid rgba(2,12,27,.18);
+    background:var(--card);
+    padding:10px 14px;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:600;
+  }
+  .btn.primary{
+    border-color:transparent;
+    background:linear-gradient(180deg,var(--accent),var(--accent-2));
+    color:white;
+  }
   .btn:active{transform:translateY(1px)}
 </style>
 </head>
@@ -143,7 +185,8 @@
           </div>
 
           <div class="small" style="margin-top:8px">
-            <strong>Formulas</strong> — For DR-rated pipes: thickness \(t = \dfrac{OD}{DR}\), \(ID = OD - 2t = OD\,(1 - \frac{2}{DR})\).
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>           
+ <strong>Formulas</strong> — For DR-rated pipes: thickness \(t = \dfrac{OD}{DR}\), \(ID = OD - 2t = OD\,(1 - \frac{2}{DR})\).
             For “Not selected”, this tool uses \(D =\) nominal size directly for area & perimeter.
           </div>
         </section>
@@ -169,6 +212,59 @@
           Area \(A = \pi\left(\dfrac{D}{2}\right)^2\). Perimeter \(P = \pi\,D\). For material modes, \(D=ID\); for “Not selected”, \(D=\) nominal input.
         </div>
       </section>
+
+      <!-- GRAVITY FLOW (MANNING) -->
+      <section class="panel">
+        <h2>Gravity Flow — Manning (Full Pipe)</h2>
+        <div class="small" style="margin-bottom:8px;">
+          Uses the hydraulic diameter from above:
+          ID for selected material, or nominal D for “Not selected”, assuming full circular flow.<br>
+          US units: \(Q = \dfrac{1.486}{n} A R^{2/3} S_0^{1/2}\).
+        </div>
+
+        <div class="row2">
+          <div>
+            <label for="g_slope">Slope S₀ (ft/ft)</label>
+            <input id="g_slope" type="number" step="0.0001" value="0.001">
+          </div>
+          <div>
+            <label for="g_n">Manning n</label>
+            <input id="g_n" type="number" step="0.001" value="0.013">
+            <div class="small">Auto-suggested from material; editable.</div>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <div class="stat">
+            <div>D (hydraulic, from above)</div>
+            <div><span id="g_D">—</span> ft</div>
+          </div>
+          <div class="stat">
+            <div>A (flow area)</div>
+            <div><span id="g_A">—</span> ft²</div>
+          </div>
+          <div class="stat">
+            <div>R (hydraulic radius)</div>
+            <div><span id="g_R">—</span> ft</div>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:6px">
+          <div class="stat">
+            <div>Q</div>
+            <div><span id="g_Q">—</span> cfs</div>
+          </div>
+          <div class="stat">
+            <div>Q</div>
+            <div><span id="g_Q_gpm">—</span> gpm</div>
+          </div>
+          <div class="stat">
+            <div>V</div>
+            <div><span id="g_V">—</span> ft/s</div>
+          </div>
+        </div>
+      </section>
+
     </div>
 
     <div class="foot">
@@ -209,10 +305,23 @@
     a_ft2: document.getElementById('a_ft2'),
     p_in: document.getElementById('p_in'),
     p_ft: document.getElementById('p_ft'),
-    calcBtn: document.getElementById('calcBtn')
+    calcBtn: document.getElementById('calcBtn'),
+    // Gravity flow elements
+    gSlope: document.getElementById('g_slope'),
+    gN: document.getElementById('g_n'),
+    gD: document.getElementById('g_D'),
+    gA: document.getElementById('g_A'),
+    gR: document.getElementById('g_R'),
+    gQ: document.getElementById('g_Q'),
+    gQ_gpm: document.getElementById('g_Q_gpm'),
+    gV: document.getElementById('g_V')
   };
 
-  function fmt(n, d=3){ return (!isFinite(n)) ? "—" : Number(n).toFixed(d).replace(/\.?0+$/,''); }
+  function fmt(n, d=3){
+    return (!isFinite(n))
+      ? "—"
+      : Number(n).toFixed(d).replace(/\.?0+$/,'');
+  }
 
   function getOD(material, nom, ctx){
     const n = Number(nom);
@@ -243,6 +352,7 @@
     if (material === 'HDPE'){
       const DR = Number(ctx.hdpeDR);
       if (!(DR > 0)) return NaN;
+      // your existing DR logic preserved
       return OD * (1 - 2/DR*1.06);
     }
     if (material === 'DIP'){
@@ -253,11 +363,71 @@
     return NaN;
   }
 
+  // Track if user manually edited n so we don't override
+  let nTouched = false;
+
+  function suggestN(material){
+    if (material === 'PVC') return 0.011;
+    if (material === 'HDPE') return 0.010;
+    if (material === 'DIP') return 0.013;
+    return 0.013; // generic concrete/CI-style default
+  }
+
+  // Get hydraulic diameter in ft based on current inputs (matches your section logic)
+  function getHydraulicD_ft(){
+    const material = el.mat.value;
+    const nom = parseFloat(el.nom.value);
+    const ctx = {
+      pvcDR: el.pvcDR.value,
+      hdpeDR: el.hdpeDR.value,
+      series: el.hdpeSeries.value,
+      dipThk: el.dipThk.value
+    };
+
+    if (material === 'NONE'){
+      return (nom > 0) ? nom / 12 : NaN; // nominal directly
+    }
+
+    const OD = getOD(material, nom, ctx);
+    const ID = getID(material, OD, ctx);
+    if (!isFinite(ID) || ID <= 0) return NaN;
+    return ID / 12; // convert to ft
+  }
+
+  function updateGravity(){
+    if (!el.gSlope || !el.gN) return;
+
+    const D_ft = getHydraulicD_ft();
+    const S0 = parseFloat(el.gSlope.value);
+    const n = parseFloat(el.gN.value);
+    const pi = Math.PI;
+
+    let A = NaN, R = NaN, Q = NaN, V = NaN, Qgpm = NaN;
+
+    if (isFinite(D_ft) && D_ft > 0){
+      A = pi * Math.pow(D_ft/2, 2);  // full pipe area
+      R = D_ft / 4;                  // full circular pipe
+    }
+
+    if (isFinite(A) && A > 0 && isFinite(R) && R > 0 && S0 > 0 && n > 0){
+      Q = (1.486 / n) * A * Math.pow(R, 2/3) * Math.sqrt(S0); // cfs
+      V = Q / A;                                              // ft/s
+      Qgpm = Q * 7.48052 * 60;                                // gpm
+    }
+
+    if (el.gD)     el.gD.textContent = fmt(D_ft, 4);
+    if (el.gA)     el.gA.textContent = fmt(A, 4);
+    if (el.gR)     el.gR.textContent = fmt(R, 4);
+    if (el.gQ)     el.gQ.textContent = fmt(Q, 4);
+    if (el.gQ_gpm) el.gQ_gpm.textContent = fmt(Qgpm, 1);
+    if (el.gV)     el.gV.textContent = fmt(V, 3);
+  }
+
   function compute(){
     const material = el.mat.value;
     const nom = parseFloat(el.nom.value);
 
-    // Show/hide option blocks
+    // Show/hide option blocks (unchanged behavior)
     el.pvcBlock.style.display  = (material === 'PVC')  ? '' : 'none';
     el.hdpeBlock.style.display = (material === 'HDPE') ? '' : 'none';
     el.dipBlock.style.display  = (material === 'DIP')  ? '' : 'none';
@@ -277,7 +447,7 @@
     if (material === 'NONE'){
       const Dnom = (nom > 0) ? nom : NaN;
       D_for_section = Dnom;   // area/perimeter use nominal
-      OD = NaN;               // leave OD/ID blank to avoid implying standards
+      OD = NaN;               // do not imply standard OD/ID
       ID = NaN;
     }
 
@@ -286,26 +456,44 @@
     const P_in  = isFinite(D_for_section) ? pi * D_for_section : NaN;
     const in_to_ft = 1/12;
 
-    // Render
+    // Render original results
     el.od_in.textContent = fmt(OD, 3);
     el.id_in.textContent = fmt(ID, 3);
     el.a_in2.textContent = fmt(A_in2, 3);
     el.a_ft2.textContent = fmt(A_in2 * in_to_ft * in_to_ft, 5);
     el.p_in.textContent  = fmt(P_in, 3);
     el.p_ft.textContent  = fmt(P_in * in_to_ft, 4);
+
+    // Auto-suggest Manning n if user hasn't overridden
+    if (el.gN && !nTouched){
+      el.gN.value = suggestN(material);
+    }
+
+    // Update gravity panel
+    updateGravity();
   }
 
-  // Events
+  // Events (original + gravity hooks)
   const watch = (node)=>['input','change','keyup'].forEach(ev=>node.addEventListener(ev, compute));
   [el.mat, el.nom, el.pvcDR, el.hdpeSeries, el.hdpeDR, el.dipThk].forEach(watch);
+
+  if (el.gSlope){
+    ['input','change','keyup'].forEach(ev=>el.gSlope.addEventListener(ev, updateGravity));
+  }
+
+  if (el.gN){
+    ['input','change','keyup'].forEach(ev=>el.gN.addEventListener(ev, function(){
+      nTouched = true; // user took control
+      updateGravity();
+    }));
+  }
+
   el.calcBtn.addEventListener('click', compute);
 
   // Initial state
-  el.mat.value = 'NONE'; // default to Not selected mode per your request
+  el.mat.value = 'NONE'; // keep your original default behavior
   compute();
 })();
 </script>
 </body>
 </html>
-
-
