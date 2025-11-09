@@ -11,7 +11,10 @@
     --accent:#0ea5e9; --accent-2:#0284c7; --ring:rgba(14,165,233,.35);
   }
   @media (prefers-color-scheme: dark){
-    :root{ --bg:#0b1320; --card:#0f1a2b; --ink:#e5f2ff; --muted:#9fb3c8; --accent:#38bdf8; --accent-2:#0ea5e9; --ring:rgba(56,189,248,.35); }
+    :root{
+      --bg:#0b1320; --card:#0f1a2b; --ink:#e5f2ff; --muted:#9fb3c8;
+      --accent:#38bdf8; --accent-2:#0ea5e9; --ring:rgba(56,189,248,.35);
+    }
   }
   *{box-sizing:border-box}
   body{
@@ -44,7 +47,7 @@
     border:1px solid rgba(2,12,27,.08);
     border-radius:14px;
     padding:16px;
-    background:linear-gradient(180deg, rgba(56,189,248,.07), transparent 45%), var(--card)
+    background:linear-gradient(180deg, rgba(56,189,248,.07), transparent 45%), var(--card);
   }
   h2{margin:.1rem 0 .75rem; font-size:1rem}
   label{font-size:.92rem; color:var(--muted)}
@@ -185,8 +188,7 @@
           </div>
 
           <div class="small" style="margin-top:8px">
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>           
- <strong>Formulas</strong> — For DR-rated pipes: thickness \(t = \dfrac{OD}{DR}\), \(ID = OD - 2t = OD\,(1 - \frac{2}{DR})\).
+            <strong>Formulas</strong> — For DR-rated pipes: thickness \(t = \dfrac{OD}{DR}\), \(ID = OD - 2t = OD\,(1 - \frac{2}{DR})\).
             For “Not selected”, this tool uses \(D =\) nominal size directly for area & perimeter.
           </div>
         </section>
@@ -215,11 +217,11 @@
 
       <!-- GRAVITY FLOW (MANNING) -->
       <section class="panel">
-        <h2>Gravity Flow — Manning (Full Pipe)</h2>
+        <h2>Gravity Flow — Manning (Full Pipe & Partial y/D)</h2>
         <div class="small" style="margin-bottom:8px;">
           Uses the hydraulic diameter from above:
-          ID for selected material, or nominal D for “Not selected”, assuming full circular flow.<br>
-          US units: \(Q = \dfrac{1.486}{n} A R^{2/3} S_0^{1/2}\).
+          ID for selected material, or nominal D for “Not selected”. US units:
+          \(Q = \dfrac{1.486}{n} A R^{2/3} S_0^{1/2}\).
         </div>
 
         <div class="row2">
@@ -234,34 +236,142 @@
           </div>
         </div>
 
+        <!-- Partial flow depth ratio -->
+        <div class="row2" style="margin-top:8px;">
+          <div>
+            <label for="g_yd">Depth ratio y/D</label>
+            <input id="g_yd" type="number" step="0.01" min="0" max="1" value="1.00">
+            <div class="small">1.00 = full; set 0–1 for partial flow.</div>
+          </div>
+          <div>
+            <label>&nbsp;</label>
+            <div class="small">Partial flow uses same n and S₀.</div>
+          </div>
+        </div>
+
+        <!-- Full pipe metrics -->
         <div class="row" style="margin-top:10px">
           <div class="stat">
             <div>D (hydraulic, from above)</div>
             <div><span id="g_D">—</span> ft</div>
           </div>
           <div class="stat">
-            <div>A (flow area)</div>
+            <div>A (full)</div>
             <div><span id="g_A">—</span> ft²</div>
           </div>
           <div class="stat">
-            <div>R (hydraulic radius)</div>
+            <div>R (full)</div>
             <div><span id="g_R">—</span> ft</div>
           </div>
         </div>
 
         <div class="row" style="margin-top:6px">
           <div class="stat">
-            <div>Q</div>
+            <div>Q (full)</div>
             <div><span id="g_Q">—</span> cfs</div>
           </div>
           <div class="stat">
-            <div>Q</div>
+            <div>Q (full)</div>
             <div><span id="g_Q_gpm">—</span> gpm</div>
           </div>
           <div class="stat">
-            <div>V</div>
+            <div>V (full)</div>
             <div><span id="g_V">—</span> ft/s</div>
           </div>
+        </div>
+
+        <!-- Partial pipe metrics -->
+        <div class="row" style="margin-top:10px">
+          <div class="stat">
+            <div>y (depth)</div>
+            <div><span id="p_y">—</span> ft</div>
+          </div>
+          <div class="stat">
+            <div>A (partial)</div>
+            <div><span id="p_A">—</span> ft²</div>
+          </div>
+          <div class="stat">
+            <div>R (partial)</div>
+            <div><span id="p_R">—</span> ft</div>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:6px">
+          <div class="stat">
+            <div>Q (partial)</div>
+            <div><span id="p_Q">—</span> cfs</div>
+          </div>
+          <div class="stat">
+            <div>Q (partial)</div>
+            <div><span id="p_Q_gpm">—</span> gpm</div>
+          </div>
+          <div class="stat">
+            <div>V (partial)</div>
+            <div><span id="p_V">—</span> ft/s</div>
+          </div>
+        </div>
+
+        <!-- Self-check note -->
+        <div class="small" style="margin-top:4px;">
+          Self-check: when y/D = 1.00, partial-flow A, Q, and V should match the full-flow results above (within rounding).
+        </div>
+      </section>
+
+      <!-- PRESSURE FLOW (HAZEN-WILLIAMS) -->
+      <section class="panel">
+        <h2>Pressure Flow — Hazen-Williams</h2>
+        <div class="small" style="margin-bottom:8px;">
+          Uses the same full-pipe diameter \(D\) from above
+          (ID for selected material, or nominal D for “Not selected”). US units:
+          \(Q = 0.442\,C\,D^{2.63} S^{0.54}\),
+          where \(D\) in ft, \(S = \Delta h / L\) in ft/ft.
+        </div>
+
+        <div class="row2">
+          <div>
+            <label for="hw_C">Hazen-Williams C</label>
+            <input id="hw_C" type="number" step="1" value="130">
+            <div class="small">Auto-suggested from material; editable.</div>
+          </div>
+          <div>
+            <label for="hw_S">Slope S (ft/ft)</label>
+            <input id="hw_S" type="number" step="0.0001" value="0.002">
+            <div class="small">Energy grade line slope (headloss / length).</div>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <div class="stat">
+            <div>D (from above)</div>
+            <div><span id="hw_D">—</span> ft</div>
+          </div>
+          <div class="stat">
+            <div>A (full)</div>
+            <div><span id="hw_A">—</span> ft²</div>
+          </div>
+          <div class="stat">
+            <div>h<sub>f</sub> (per 1000 ft)</div>
+            <div><span id="hw_hl1000">—</span> ft / 1000 ft</div>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:6px">
+          <div class="stat">
+            <div>Q</div>
+            <div><span id="hw_Q">—</span> cfs</div>
+          </div>
+          <div class="stat">
+            <div>Q</div>
+            <div><span id="hw_Qgpm">—</span> gpm</div>
+          </div>
+          <div class="stat">
+            <div>V</div>
+            <div><span id="hw_V">—</span> ft/s</div>
+          </div>
+        </div>
+
+        <div class="small" style="margin-top:4px;">
+          Note: This is a quick sizing check; confirm C and allowable velocities per agency standards.
         </div>
       </section>
 
@@ -277,12 +387,10 @@
 <script>
 (function(){
   // --- Reference OD tables ---
-  // DIPS / CIOD (used by DI + PVC C900; and by HDPE when DIPS is chosen)
   const DIPS_OD = {
     3:3.96, 4:4.80, 6:6.90, 8:9.05, 10:11.10, 12:13.20, 14:15.30, 16:17.40, 18:19.50,
     20:21.60, 24:25.80, 30:31.00, 36:37.20, 42:43.40, 48:49.50
   };
-  // IPS / NPS ODs (steel/NPS; used by HDPE-IPS)
   const IPS_OD = {
     2:2.375, 3:3.5, 4:4.5, 6:6.625, 8:8.625, 10:10.75, 12:12.75,
     14:14.0, 16:16.0, 18:18.0, 20:20.0, 22:22.0, 24:24.0,
@@ -306,7 +414,7 @@
     p_in: document.getElementById('p_in'),
     p_ft: document.getElementById('p_ft'),
     calcBtn: document.getElementById('calcBtn'),
-    // Gravity flow elements
+    // Gravity full
     gSlope: document.getElementById('g_slope'),
     gN: document.getElementById('g_n'),
     gD: document.getElementById('g_D'),
@@ -314,34 +422,41 @@
     gR: document.getElementById('g_R'),
     gQ: document.getElementById('g_Q'),
     gQ_gpm: document.getElementById('g_Q_gpm'),
-    gV: document.getElementById('g_V')
+    gV: document.getElementById('g_V'),
+    // Gravity partial
+    gYd: document.getElementById('g_yd'),
+    pY: document.getElementById('p_y'),
+    pA: document.getElementById('p_A'),
+    pR: document.getElementById('p_R'),
+    pQ: document.getElementById('p_Q'),
+    pQ_gpm: document.getElementById('p_Q_gpm'),
+    pV: document.getElementById('p_V'),
+    // Hazen-Williams
+    hwC: document.getElementById('hw_C'),
+    hwS: document.getElementById('hw_S'),
+    hwD: document.getElementById('hw_D'),
+    hwA: document.getElementById('hw_A'),
+    hwQ: document.getElementById('hw_Q'),
+    hwQgpm: document.getElementById('hw_Qgpm'),
+    hwV: document.getElementById('hw_V'),
+    hwHl1000: document.getElementById('hw_hl1000')
   };
 
   function fmt(n, d=3){
-    return (!isFinite(n))
-      ? "—"
-      : Number(n).toFixed(d).replace(/\.?0+$/,'');
+    return (!isFinite(n)) ? "—" : Number(n).toFixed(d).replace(/\.?0+$/,'');
   }
 
   function getOD(material, nom, ctx){
     const n = Number(nom);
     if (!(n > 0)) return NaN;
-
-    if (material === 'PVC'){
-      return DIPS_OD[n] ?? NaN; // PVC C900 uses DIPS/CIOD
-    }
-    if (material === 'HDPE'){
-      return (ctx.series === 'IPS') ? (IPS_OD[n] ?? NaN) : (DIPS_OD[n] ?? NaN);
-    }
-    if (material === 'DIP'){
-      return DIPS_OD[n] ?? NaN;
-    }
-    // 'NONE' has no OD table
+    if (material === 'PVC')  return DIPS_OD[n] ?? NaN;
+    if (material === 'HDPE') return (ctx.series === 'IPS') ? (IPS_OD[n] ?? NaN) : (DIPS_OD[n] ?? NaN);
+    if (material === 'DIP')  return DIPS_OD[n] ?? NaN;
     return NaN;
   }
 
   function getID(material, OD, ctx){
-    if (material === 'NONE') return NaN; // handled separately using nominal
+    if (material === 'NONE') return NaN;
     if (!isFinite(OD) || OD <= 0) return NaN;
 
     if (material === 'PVC'){
@@ -352,7 +467,7 @@
     if (material === 'HDPE'){
       const DR = Number(ctx.hdpeDR);
       if (!(DR > 0)) return NaN;
-      // your existing DR logic preserved
+      // existing HDPE adjustment preserved
       return OD * (1 - 2/DR*1.06);
     }
     if (material === 'DIP'){
@@ -363,17 +478,23 @@
     return NaN;
   }
 
-  // Track if user manually edited n so we don't override
   let nTouched = false;
+  let cTouched = false;
 
   function suggestN(material){
     if (material === 'PVC') return 0.011;
     if (material === 'HDPE') return 0.010;
     if (material === 'DIP') return 0.013;
-    return 0.013; // generic concrete/CI-style default
+    return 0.013;
   }
 
-  // Get hydraulic diameter in ft based on current inputs (matches your section logic)
+  function suggestC(material){
+    if (material === 'PVC') return 150;
+    if (material === 'HDPE') return 150;
+    if (material === 'DIP') return 130;
+    return 130;
+  }
+
   function getHydraulicD_ft(){
     const material = el.mat.value;
     const nom = parseFloat(el.nom.value);
@@ -385,13 +506,13 @@
     };
 
     if (material === 'NONE'){
-      return (nom > 0) ? nom / 12 : NaN; // nominal directly
+      return (nom > 0) ? nom / 12 : NaN;
     }
 
     const OD = getOD(material, nom, ctx);
     const ID = getID(material, OD, ctx);
     if (!isFinite(ID) || ID <= 0) return NaN;
-    return ID / 12; // convert to ft
+    return ID / 12;
   }
 
   function updateGravity(){
@@ -404,30 +525,109 @@
 
     let A = NaN, R = NaN, Q = NaN, V = NaN, Qgpm = NaN;
 
+    // Full pipe
     if (isFinite(D_ft) && D_ft > 0){
-      A = pi * Math.pow(D_ft/2, 2);  // full pipe area
-      R = D_ft / 4;                  // full circular pipe
+      A = pi * Math.pow(D_ft/2, 2);
+      R = D_ft / 4;
     }
 
-    if (isFinite(A) && A > 0 && isFinite(R) && R > 0 && S0 > 0 && n > 0){
-      Q = (1.486 / n) * A * Math.pow(R, 2/3) * Math.sqrt(S0); // cfs
-      V = Q / A;                                              // ft/s
-      Qgpm = Q * 7.48052 * 60;                                // gpm
+    if (A > 0 && R > 0 && S0 > 0 && n > 0){
+      Q = (1.486 / n) * A * Math.pow(R, 2/3) * Math.sqrt(S0);
+      V = Q / A;
+      Qgpm = Q * 7.48052 * 60;
     }
 
-    if (el.gD)     el.gD.textContent = fmt(D_ft, 4);
-    if (el.gA)     el.gA.textContent = fmt(A, 4);
-    if (el.gR)     el.gR.textContent = fmt(R, 4);
-    if (el.gQ)     el.gQ.textContent = fmt(Q, 4);
-    if (el.gQ_gpm) el.gQ_gpm.textContent = fmt(Qgpm, 1);
-    if (el.gV)     el.gV.textContent = fmt(V, 3);
+    el.gD.textContent     = fmt(D_ft, 4);
+    el.gA.textContent     = fmt(A, 4);
+    el.gR.textContent     = fmt(R, 4);
+    el.gQ.textContent     = fmt(Q, 4);
+    el.gQ_gpm.textContent = fmt(Qgpm, 1);
+    el.gV.textContent     = fmt(V, 3);
+
+    // Partial y/D
+    if (!el.gYd){
+      return;
+    }
+
+    const ydRaw = parseFloat(el.gYd.value);
+    let yd = isFinite(ydRaw) ? ydRaw : NaN;
+
+    if (isFinite(D_ft) && D_ft > 0 && isFinite(yd)){
+      if (yd < 0) yd = 0;
+      if (yd > 1) yd = 1;
+      el.gYd.value = yd.toFixed(2);
+
+      const y = yd * D_ft;
+      const Rrad = D_ft / 2.0;
+
+      let Ap = NaN, Pp = NaN, Rp = NaN, Qp = NaN, Vp = NaN, Qpgpm = NaN;
+
+      if (y <= 0){
+        Ap = Pp = Rp = Qp = Vp = Qpgpm = NaN;
+      } else if (y >= 2*Rrad){
+        Ap = Math.PI * Rrad * Rrad;
+        Pp = 2 * Math.PI * Rrad;
+      } else {
+        const theta = Math.acos((Rrad - y)/Rrad);
+        const twoTheta = 2 * theta;
+        Ap = 0.5 * Rrad * Rrad * (twoTheta - Math.sin(twoTheta));
+        Pp = twoTheta * Rrad;
+      }
+
+      if (Ap > 0 && Pp > 0) Rp = Ap / Pp;
+
+      if (Ap > 0 && Rp > 0 && S0 > 0 && n > 0){
+        Qp = (1.486 / n) * Ap * Math.pow(Rp, 2/3) * Math.sqrt(S0);
+        Vp = Qp / Ap;
+        Qpgpm = Qp * 7.48052 * 60;
+      }
+
+      el.pY.textContent     = fmt(y, 4);
+      el.pA.textContent     = fmt(Ap, 4);
+      el.pR.textContent     = fmt(Rp, 4);
+      el.pQ.textContent     = fmt(Qp, 4);
+      el.pQ_gpm.textContent = fmt(Qpgpm, 1);
+      el.pV.textContent     = fmt(Vp, 3);
+    } else {
+      el.pY.textContent = el.pA.textContent = el.pR.textContent =
+      el.pQ.textContent = el.pQ_gpm.textContent = el.pV.textContent = "—";
+    }
+  }
+
+  function updateHW(){
+    if (!el.hwC || !el.hwS) return;
+
+    const D_ft = getHydraulicD_ft();
+    const C = parseFloat(el.hwC.value);
+    const S = parseFloat(el.hwS.value);
+    const pi = Math.PI;
+
+    let A = NaN, Q = NaN, V = NaN, Qgpm = NaN, hl1000 = NaN;
+
+    if (isFinite(D_ft) && D_ft > 0){
+      A = pi * Math.pow(D_ft/2, 2);
+      if (isFinite(C) && C > 0 && isFinite(S) && S > 0){
+        // Q in cfs, Hazen-Williams (US units)
+        Q = 0.442 * C * Math.pow(D_ft, 2.63) * Math.pow(S, 0.54);
+        V = Q / A;
+        Qgpm = Q * 7.48052 * 60;
+        hl1000 = S * 1000.0;
+      }
+    }
+
+    el.hwD.textContent      = fmt(D_ft, 4);
+    el.hwA.textContent      = fmt(A, 4);
+    el.hwQ.textContent      = fmt(Q, 4);
+    el.hwQgpm.textContent   = fmt(Qgpm, 1);
+    el.hwV.textContent      = fmt(V, 3);
+    el.hwHl1000.textContent = fmt(hl1000, 3);
   }
 
   function compute(){
     const material = el.mat.value;
     const nom = parseFloat(el.nom.value);
 
-    // Show/hide option blocks (unchanged behavior)
+    // Show/hide option blocks (unchanged)
     el.pvcBlock.style.display  = (material === 'PVC')  ? '' : 'none';
     el.hdpeBlock.style.display = (material === 'HDPE') ? '' : 'none';
     el.dipBlock.style.display  = (material === 'DIP')  ? '' : 'none';
@@ -442,12 +642,11 @@
     let OD = getOD(material, nom, ctx);
     let ID = getID(material, OD, ctx);
 
-    // Special mode: "Not selected" — compute with nominal directly
-    let D_for_section = ID; // by default, section uses ID
+    let D_for_section = ID;
     if (material === 'NONE'){
       const Dnom = (nom > 0) ? nom : NaN;
-      D_for_section = Dnom;   // area/perimeter use nominal
-      OD = NaN;               // do not imply standard OD/ID
+      D_for_section = Dnom;
+      OD = NaN;
       ID = NaN;
     }
 
@@ -456,7 +655,6 @@
     const P_in  = isFinite(D_for_section) ? pi * D_for_section : NaN;
     const in_to_ft = 1/12;
 
-    // Render original results
     el.od_in.textContent = fmt(OD, 3);
     el.id_in.textContent = fmt(ID, 3);
     el.a_in2.textContent = fmt(A_in2, 3);
@@ -464,36 +662,59 @@
     el.p_in.textContent  = fmt(P_in, 3);
     el.p_ft.textContent  = fmt(P_in * in_to_ft, 4);
 
-    // Auto-suggest Manning n if user hasn't overridden
+    // Auto-suggest Manning n
     if (el.gN && !nTouched){
       el.gN.value = suggestN(material);
     }
+    // Auto-suggest Hazen C
+    if (el.hwC && !cTouched){
+      el.hwC.value = suggestC(material);
+    }
 
-    // Update gravity panel
     updateGravity();
+    updateHW();
   }
 
-  // Events (original + gravity hooks)
   const watch = (node)=>['input','change','keyup'].forEach(ev=>node.addEventListener(ev, compute));
   [el.mat, el.nom, el.pvcDR, el.hdpeSeries, el.hdpeDR, el.dipThk].forEach(watch);
 
   if (el.gSlope){
-    ['input','change','keyup'].forEach(ev=>el.gSlope.addEventListener(ev, updateGravity));
+    ['input','change','keyup'].forEach(ev=>el.gSlope.addEventListener(ev, function(){
+      updateGravity();
+      updateHW(); // slope conceptually separate, but recompute both
+    }));
   }
 
   if (el.gN){
     ['input','change','keyup'].forEach(ev=>el.gN.addEventListener(ev, function(){
-      nTouched = true; // user took control
+      nTouched = true;
       updateGravity();
     }));
+  }
+
+  if (el.gYd){
+    ['input','change','keyup'].forEach(ev=>el.gYd.addEventListener(ev, updateGravity));
+  }
+
+  if (el.hwC){
+    ['input','change','keyup'].forEach(ev=>el.hwC.addEventListener(ev, function(){
+      cTouched = true;
+      updateHW();
+    }));
+  }
+
+  if (el.hwS){
+    ['input','change','keyup'].forEach(ev=>el.hwS.addEventListener(ev, updateHW));
   }
 
   el.calcBtn.addEventListener('click', compute);
 
   // Initial state
-  el.mat.value = 'NONE'; // keep your original default behavior
+  el.mat.value = 'NONE';
   compute();
 })();
 </script>
 </body>
 </html>
+
+
