@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Closed Conduit Flow</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- MathJax: render LaTeX math in the page -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)'], ['$', '$']],
+                displayMath: [['$$','$$'], ['\\[','\\]']]
+            },
+            svg: {fontCache: 'global'}
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <style>
+        /* highlight invalid inputs */
+        .input-error {
+            border: 2px solid #dc3545 !important; /* bootstrap danger red */
+            box-shadow: 0 0 0 .2rem rgba(220,53,69,.25) !important;
+        }
+
+    </style>
+</head>
+
+<body class="bg-light">
+    <div class="container py-5">
+        <h1 class="mb-4">Closed Conduit / Pressurized Flow</h1>
+        
+        <!-- Table Button and Collapsible Table -->
+        <div class="mb-4">
+            <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#headlossTableCollapse" aria-expanded="false" aria-controls="headlossTableCollapse">
+                Show / Hide Reference Hazen Williams Coefficient Table
+            </button>
+        </div>
+        
+        <div class="collapse mb-5" id="headlossTableCollapse">
+            <table class="table table-bordered table-sm table-striped table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Pipe Material</th>
+                        <th>C</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Ductile iron</td>
+                        <td>140</td>
+                    </tr>
+                    <tr>
+                        <td>Concrete (regardless of age)</td>
+                        <td>130</td>
+                    </tr>
+                    <tr>
+                        <td>Cast iron - New</td>
+                        <td>130</td>
+                    </tr>
+                    <tr>
+                        <td>Cast iron - 5 yr old</td>
+                        <td>120</td>
+                    </tr>
+                    <tr>
+                        <td>Cast iron - 20 yr old</td>
+                        <td>100</td>
+                    </tr>
+                    <tr>
+                        <td>Welded steel, new</td>
+                        <td>120</td>
+                    </tr>
+                    <tr>
+                        <td>Wood stave (regardless of age)</td>
+                        <td>120</td>
+                    </tr>
+                    <tr>
+                        <td>Vitrified clay</td>
+                        <td>110</td>
+                    </tr>
+                    <tr>
+                        <td>Riveted steel, new</td>
+                        <td>110</td>
+                    </tr>
+                    <tr>
+                        <td>Brick sewers</td>
+                        <td>100</td>
+                    </tr>
+                    <tr>
+                        <td>Asbestos-cement</td>
+                        <td>140</td>
+                    </tr>
+                    <tr>
+                        <td>Plastic (PVC, HDPE)</td>
+                        <td>150</td>
+                    </tr>
+                    <tr>
+                        <td>Galvanized iron (concrete-lined)</td>
+                        <td>120</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- 1x2 Card Layout -->
+        <div class="row mt-5">
+            <!-- Card 1 -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Hazen-Williams Equation for Flow and Velocity</h5>
+                        <p class="card-text">The Hazen-Williams equation is assumed to be relatively accurate for water flow in piping systems when:</p>
+                        <ul>
+                            <li>the Reynolds number is above 10<sup>5</sup> (turbulent flow)</li>
+                            <li>the water temperature is in the range 40&deg;F &ndash; 75&deg;F (5&deg;C &ndash; 25&deg;C) and the kinematic viscosity is approximately 1.1 cSt</li>
+                        </ul>
+                        <div class="math-block">
+                            <p>\[ Q = k_1 C A R_{H}^{0.63} S^{0.54} \]</p>
+                            where:
+                            <ul>
+                                \( Q \) = discharge (ft<sup>3</sup>/sec or m<sup>3</sup>/sec)   <br>
+                                \( k_1 \) = unit conversion factor (1.318 for US customary units, 0.849 for SI units)   <br>
+                                \( C \) = Hazen-Williams roughness coefficient (dimensionless)   <br>
+                                \( A \) = cross-sectional area of flow (ft<sup>2</sup> or m<sup>2</sup>)   <br>
+                                \( R_H \) = hydraulic radius (ft or m) = Area A / Wetted Perimeter P  <br>
+                                \( S \) = slope of the energy grade line (ft/ft or m/m)   <br>
+                            </ul>
+                        </div>
+                        <!-- Flow Rate Calculator header -->
+                        <div class="text-center mb-3">
+                            <strong class="d-inline-block" style="max-width:480px; font-size:1.125rem;"> ~ Flow Rate Calculator ~</strong>
+                        </div>
+
+                        <div class="mt-3" id="card1Collapse">
+                            <form id="card1Form">
+                                <div class="mb-3">
+                                    <label for="unitsSelect" class="form-label">Units</label>
+                                    <select id="unitsSelect" class="form-select">
+                                        <option value="us">US customary (diameter in feet)</option>
+                                        <option value="si">SI (diameter in meters)</option>
+                                    </select>
+                                        <div class="form-text" id="k1Info">k1 = 1.318 (US customary)</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="roughnessInput" class="form-label">Roughness coefficient (C)</label>
+                                    <input type="number" step="any" id="roughnessInput" class="form-control" placeholder="e.g., 140">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="diameterInput" class="form-label">Diameter of pipe</label>
+                                    <div class="input-group">
+                                        <input type="number" step="any" id="diameterInput" class="form-control" placeholder="Enter diameter">
+                                        <span class="input-group-text" id="diameterUnit">ft</span>
+                                        <span class="input-group-text">Area:</span>
+                                        <span class="input-group-text" id="areaDisplay">—</span>
+                                        <span class="input-group-text" id="areaUnit">ft<sup>2</sup></span>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="submergedAreaInput" class="form-label">Submerged Area (A)</label>
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" id="autoSubmergedArea">
+                                        <label class="form-check-label" for="autoSubmergedArea">Auto-fill for full circular pipe (A = πD²/4)</label>
+                                    </div>
+                                    <div class="input-group mb-2">
+                                        <input type="number" step="any" id="submergedAreaInput" class="form-control" placeholder="Enter Submerged Area">
+                                        <span class="input-group-text" id="submergedAreaUnit">ft<sup>2</sup></span>
+                                    </div>
+
+                                    <label for="wettedPerimeterInput" class="form-label">Wetted Perimeter (P)</label>
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" id="autoPerimeter">
+                                        <label class="form-check-label" for="autoPerimeter">Auto-fill for full circular pipe (P = πD)</label>
+                                    </div>
+                                    <div class="input-group mb-2">
+                                        <input type="number" step="any" id="wettedPerimeterInput" class="form-control" placeholder="Enter Wetted Perimeter">
+                                        <span class="input-group-text" id="wettedPerimeterUnit">ft</span>
+                                    </div>
+
+                                    <label class="form-label">Hydraulic Radius (R<sub>H</sub>)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">R = A / P</span>
+                                        <span class="input-group-text" id="hydradiusDisplay">—</span>
+                                        <span class="input-group-text" id="hydradiusUnit">ft</span>
+                                    </div>
+                                    <div class="form-text">Calculate Hydraulic radius R = A / P (Submerged Area / Wetted Perimeter). The full-pipe submerged area will be auto-filled from the calculated pipe area but can be edited.</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="slopeInput" class="form-label">Slope of the energy grade line (S)</label>
+                                    <input type="number" step="any" id="slopeInput" class="form-control" placeholder="Enter slope (e.g., 0.001)">
+                                </div>
+
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-success" id="applyBtn">Apply</button>
+                                    <button type="button" class="btn btn-secondary" id="resetBtn">Reset</button>
+                                </div>
+                            </form>
+
+                            <!-- Results section (hidden until Apply is clicked) -->
+                            <div class="mt-4 p-3 bg-light border rounded" id="resultsSection" style="display: none;">
+                                <h6 class="mb-3">Results</h6>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Discharge (Q)</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text" id="qDisplay">—</span>
+                                            <span class="input-group-text" id="qUnit">ft³/sec</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Velocity (v)</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text" id="vDisplay">—</span>
+                                            <span class="input-group-text" id="vUnit">ft/sec</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Card 2 -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Hazen-Williams Headloss</h5>
+                        <!-- Start of two columns-->
+                        <div class="row">
+                            <!-- Column 1: Headloss as feet -->
+                            <div class="col-md-6">
+                                <div class="math-block">
+                                    <p>Headloss as feet</p>
+                                    <p>\[ h_f = \frac{4.73 L}{C^{1.852} D^{4.87}} Q^{1.852} \]</p>
+                                </div>
+                                where:
+                                <ul>
+                                    \( h_f \) = headloss (feet)   <br>
+                                    \( L \) = pipe length of head loss (feet)   <br>
+                                    \( C \) = Hazen-Williams roughness coefficient (dimensionless)   <br>
+                                    \( D \) = diameter of pipe (feet)   <br>
+                                    \( Q \) = flow (ft<sup>3</sup>/sec)   <br>
+                            </div>
+                            <!-- Column 2: Headloss as pressure -->
+                            <div class="col-md-6">
+                                <div class="math-block">
+                                    <p>Headloss as pressure</p>
+                                    <p>\[ P = \frac{4.52 L}{C^{1.85}D^{4.87}} Q^{1.85} \]</p>
+                                </div>
+                                where:
+                                <ul>
+                                    \( P \) = headloss (psi)   <br>
+                                    \( L \) = pipe length of head loss (feet)   <br>
+                                    \( C \) = Hazen-Williams roughness coefficient (dimensionless)   <br>
+                                    \( D \) = diameter of pipe <span style="color: blue;">(inches)</span>  <br>
+                                    \( Q \) = flow <span style="color: blue;">(gpm)</span>   <br>
+
+                            </div>
+                        </div>
+                        <!-- Headloss Calculator header -->
+                        <div class="text-center mb-3">
+                            <strong class="d-inline-block" style="max-width:480px; font-size:1.125rem;"> ~ Headloss Calculator ~</strong>
+                        </div>
+                            <form id="card2Form">
+                                <div class="mb-3">
+                                    <label for="lengthInput" class="form-label">Pipe Length (L)</label>
+                                    <input type="number" step="any" id="lengthInput" class="form-control" placeholder="Enter pipe length (feet)">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="roughness2Input" class="form-label">Roughness coefficient (C)</label>
+                                    <input type="number" step="any" id="roughness2Input" class="form-control" placeholder="e.g., 140">
+                                </div> 
+                                
+                                <div class="mb-3">
+                                    <label for="diameter2Input" class="form-label">Diameter (D)</label>
+                                    <div class="input-group mb-2">
+                                        <input type="number" step="any" id="diamFeetInput" class="form-control" placeholder="Pipe diameter (feet)">
+                                        <span class="input-group-text">ft</span>
+                                        <input type="number" step="any" id="diamInInput" class="form-control" placeholder="Pipe diameter (inches)">
+                                        <span class="input-group-text">in</span>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="flowInput" class="form-label">Flow rate (Q)</label>
+                                    <div class="input-group mb-2">
+                                        <input type="number" step="any" id="flowCFSInput" class="form-control" placeholder="Flow rate (cfs)">
+                                        <span class="input-group-text">cfs</span>
+                                        <input type="number" step="any" id="flowGPMInput" class="form-control" placeholder="Flow rate (gpm)">
+                                        <span class="input-group-text">gpm</span>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-success" id="applyHeadlossBtn">Apply</button>
+                                    <button type="button" class="btn btn-secondary" id="resetHeadlossBtn">Reset</button>
+                                </div>
+                            </form>
+
+                            <!-- Headloss Results section (hidden until Apply is clicked) -->
+                            <div class="mt-4 p-3 bg-light border rounded" id="headlossResultsSection" style="display: none;">
+                                <h6 class="mb-3">Results</h6>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Headloss (feet)</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text" id="headlossFeetDisplay">—</span>
+                                            <span class="input-group-text" id="headlossFeetUnit">ft</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Headloss (pressure)</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text" id="headlossPSIDisplay">—</span>
+                                            <span class="input-group-text" id="headlossPSIUnit">psi</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                    </div>
+                </div>
+            </div>
+            <!-- Additional cards removed -->
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Card 1 form behavior: compute area from diameter and update units
+        (function(){
+            function qs(id){return document.getElementById(id)}
+            var units = qs('unitsSelect');
+            var diameter = qs('diameterInput');
+            var diameterUnit = qs('diameterUnit');
+            var areaDisplay = qs('areaDisplay');
+            var areaUnit = qs('areaUnit');
+            var submergedAreaInput = qs('submergedAreaInput');
+            var submergedAreaUnit = qs('submergedAreaUnit');
+            var wettedPerimeterInput = qs('wettedPerimeterInput');
+            var wettedPerimeterUnit = qs('wettedPerimeterUnit');
+            var hydradiusDisplay = qs('hydradiusDisplay');
+            var hydradiusUnit = qs('hydradiusUnit');
+            var k1Info = qs('k1Info');
+            var autoPerimeter = qs('autoPerimeter');
+            var autoSubmergedArea = qs('autoSubmergedArea');
+            var roughnessInput = qs('roughnessInput');
+            var slopeInput = qs('slopeInput');
+            var resultsSection = qs('resultsSection');
+            var qDisplay = qs('qDisplay');
+            var qUnit = qs('qUnit');
+            var vDisplay = qs('vDisplay');
+            var vUnit = qs('vUnit');
+            // Headloss diameter inputs (feet / inches)
+            var diamFeetInput = qs('diamFeetInput');
+            var diamInInput = qs('diamInInput');
+            var suppressDiamSync = false;
+            // Headloss form inputs and results
+            var lengthInput = qs('lengthInput');
+            var roughness2Input = qs('roughness2Input');
+            var flowCFSInput = qs('flowCFSInput');
+            var flowGPMInput = qs('flowGPMInput');
+            var headlossFeetDisplay = qs('headlossFeetDisplay');
+            var headlossPSIDisplay = qs('headlossPSIDisplay');
+            var headlossResultsSection = qs('headlossResultsSection');
+            var applyHeadlossBtn = qs('applyHeadlossBtn');
+            var resetHeadlossBtn = qs('resetHeadlossBtn');
+            // Headloss flow rate inputs (feet / inches)
+            var flowCFSInput = qs('flowCFSInput');
+            var flowGPMInput = qs('flowGPMInput');
+            var suppressFlowSync = false;
+
+            function formatNumber(x){
+                if (x === null || isNaN(x)) return '—';
+                // show reasonable precision
+                if (x >= 1) return x.toFixed(6).replace(/\.0+$/,'');
+                return x.toExponential(6);
+            }
+
+            function computeArea(){
+                var d = parseFloat(diameter.value);
+                if (!isFinite(d) || d <= 0){
+                    areaDisplay.textContent = '—';
+                    // clear dependent auto-filled fields when diameter is empty/invalid
+                    if (submergedAreaInput) { submergedAreaInput.value = ''; submergedAreaInput.disabled = false; }
+                    if (wettedPerimeterInput) { wettedPerimeterInput.value = ''; wettedPerimeterInput.disabled = false; }
+                    if (hydradiusDisplay) { hydradiusDisplay.textContent = '—'; }
+                    return;
+                }
+                var area = 0;
+                if (units.value === 'us'){
+                    // US: input in feet, area in ft^2
+                    area = Math.PI * d * d / 4.0;
+                    areaUnit.textContent = 'ft²';
+                } else {
+                    // SI: input in meters, area in m^2
+                    area = Math.PI * d * d / 4.0;
+                    areaUnit.textContent = 'm²';
+                }
+                areaDisplay.textContent = formatNumber(area);
+                // populate submerged area input with computed area (numeric value) if auto-fill is on
+                if (autoSubmergedArea && autoSubmergedArea.checked){
+                    if (submergedAreaInput) submergedAreaInput.value = (isFinite(area) ? area.toFixed(6) : '');
+                    if (submergedAreaInput) submergedAreaInput.disabled = true;
+                } else {
+                    if (submergedAreaInput) submergedAreaInput.disabled = false;
+                }
+                // after populating, update hydraulic radius
+                computeHydraulicRadius();
+            }
+
+            function computePerimeterIfAuto(){
+                if (!autoPerimeter || !wettedPerimeterInput) return;
+                if (!autoPerimeter.checked){ wettedPerimeterInput.disabled = false; return; }
+                // compute P = pi * D (D is diameter input value)
+                var d = parseFloat(diameter && diameter.value);
+                if (!isFinite(d) || d <= 0){ wettedPerimeterInput.value = ''; hydradiusDisplay.textContent = '—'; return; }
+                var P = Math.PI * d;
+                wettedPerimeterInput.value = P.toFixed(6);
+                wettedPerimeterInput.disabled = true;
+                // update hydraulic radius now that P changed
+                computeHydraulicRadius();
+            }
+            
+            function computeHydraulicRadius(){
+                if (!hydradiusDisplay) return;
+                var A = parseFloat(submergedAreaInput && submergedAreaInput.value);
+                var P = parseFloat(wettedPerimeterInput && wettedPerimeterInput.value);
+                if (!isFinite(A) || !isFinite(P) || P <= 0){ hydradiusDisplay.textContent = '—'; return; }
+                var R = A / P;
+                hydradiusDisplay.textContent = formatNumber(R);
+            }
+
+            if (units){
+                units.addEventListener('change', function(){
+                    if (units.value === 'us'){
+                        diameterUnit.textContent = 'ft';
+                        areaUnit.textContent = 'ft²';
+                        submergedAreaUnit.textContent = 'ft²';
+                        wettedPerimeterUnit.textContent = 'ft';
+                        hydradiusUnit.textContent = 'ft';
+                        if (k1Info) k1Info.textContent = 'k1 = 1.318 (US customary)';
+                    } else {
+                        diameterUnit.textContent = 'm';
+                        areaUnit.textContent = 'm²';
+                        submergedAreaUnit.textContent = 'm²';
+                        wettedPerimeterUnit.textContent = 'm';
+                        hydradiusUnit.textContent = 'm';
+                        if (k1Info) k1Info.textContent = 'k1 = 0.849 (SI)';
+                    }
+                    computeArea();
+                });
+            }
+            if (diameter){ diameter.addEventListener('input', function(){ computeArea(); computePerimeterIfAuto(); if (diameter.classList) diameter.classList.remove('input-error'); }); }
+            if (submergedAreaInput) submergedAreaInput.addEventListener('input', function(){ computeHydraulicRadius(); if (submergedAreaInput.classList) submergedAreaInput.classList.remove('input-error'); if (wettedPerimeterInput && wettedPerimeterInput.classList) wettedPerimeterInput.classList.remove('input-error'); });
+            if (wettedPerimeterInput) wettedPerimeterInput.addEventListener('input', function(){ computeHydraulicRadius(); if (wettedPerimeterInput.classList) wettedPerimeterInput.classList.remove('input-error'); if (submergedAreaInput && submergedAreaInput.classList) submergedAreaInput.classList.remove('input-error'); });
+            if (roughnessInput) roughnessInput.addEventListener('input', function(){ if (roughnessInput.classList) roughnessInput.classList.remove('input-error'); });
+            if (slopeInput) slopeInput.addEventListener('input', function(){ if (slopeInput.classList) slopeInput.classList.remove('input-error'); });
+            // Sync diameter inputs (feet <-> inches)
+            if (diamFeetInput) diamFeetInput.addEventListener('input', function(){
+                if (suppressDiamSync) return;
+                suppressDiamSync = true;
+                var f = parseFloat(diamFeetInput.value);
+                if (!isFinite(f)){
+                    if (diamInInput) diamInInput.value = '';
+                } else {
+                    if (diamInInput) diamInInput.value = (f * 12).toFixed(6).replace(/\.0+$/,'');
+                }
+                suppressDiamSync = false;
+            });
+            if (diamInInput) diamInInput.addEventListener('input', function(){
+                if (suppressDiamSync) return;
+                suppressDiamSync = true;
+                var inches = parseFloat(diamInInput.value);
+                if (!isFinite(inches)){
+                    if (diamFeetInput) diamFeetInput.value = '';
+                } else {
+                    if (diamFeetInput) diamFeetInput.value = (inches / 12).toFixed(6).replace(/\.0+$/,'');
+                }
+                suppressDiamSync = false;
+            });
+            // Sync flow rate inputs (cfs <-> gpm)
+            if (flowCFSInput) flowCFSInput.addEventListener('input', function(){
+                if (suppressFlowSync) return;
+                suppressFlowSync = true;
+                var cfs = parseFloat(flowCFSInput.value);
+                if (!isFinite(cfs)){
+                    if (flowGPMInput) flowGPMInput.value = '';
+                } else {
+                    if (flowGPMInput) flowGPMInput.value = (cfs * 7.48052 * 60).toFixed(6).replace(/\.0+$/,'');
+                }
+                suppressFlowSync = false;
+            });
+            if (flowGPMInput) flowGPMInput.addEventListener('input', function(){
+                if (suppressFlowSync) return;
+                suppressFlowSync = true;
+                var gpm = parseFloat(flowGPMInput.value);
+                if (!isFinite(gpm)){
+                    if (flowCFSInput) flowCFSInput.value = '';
+                } else {
+                    if (flowCFSInput) flowCFSInput.value = (gpm / 7.48052 / 60).toFixed(6).replace(/\.0+$/,'');
+                }
+                suppressFlowSync = false;
+            });
+            
+            if (autoPerimeter) autoPerimeter.addEventListener('change', function(){
+                if (autoPerimeter.checked){
+                    // compute and lock
+                    computePerimeterIfAuto();
+                } else {
+                    // unlock for manual input: make BOTH perimeter and submerged area editable
+                    if (wettedPerimeterInput) wettedPerimeterInput.disabled = false;
+                    if (submergedAreaInput) submergedAreaInput.disabled = false;
+                    computeHydraulicRadius();
+                }
+                // Sync the other toggle
+                if (autoSubmergedArea) autoSubmergedArea.checked = autoPerimeter.checked;
+            });
+
+            if (autoSubmergedArea) autoSubmergedArea.addEventListener('change', function(){
+                if (autoSubmergedArea.checked){
+                    // compute and lock
+                    computeArea();
+                } else {
+                    // unlock for manual input
+                    if (submergedAreaInput) submergedAreaInput.disabled = false;
+                    computeHydraulicRadius();
+                }
+                // Sync the other toggle and update perimeter if needed
+                if (autoPerimeter) {
+                    autoPerimeter.checked = autoSubmergedArea.checked;
+                    if (autoSubmergedArea.checked) {
+                        // when submerged area auto-fill is enabled, also auto-fill perimeter
+                        computePerimeterIfAuto();
+                    } else {
+                        // ensure wetted perimeter input is editable when auto-fill is off
+                        if (wettedPerimeterInput) wettedPerimeterInput.disabled = false;
+                    }
+                }
+            });
+
+            // Apply button: calculate Q and v
+            var applyBtn = qs('applyBtn');
+            if (applyBtn){
+                applyBtn.addEventListener('click', function(){
+                    // clear previous highlights
+                    [roughnessInput, diameter, submergedAreaInput, wettedPerimeterInput, slopeInput].forEach(function(el){ if (el && el.classList) el.classList.remove('input-error'); });
+
+                    // Gather all input values
+                    var unitType = units && units.value;
+                    var k1Val = (unitType === 'us') ? 1.318 : 0.849;
+                    var C = parseFloat(roughnessInput && roughnessInput.value);
+                    var A = parseFloat(submergedAreaInput && submergedAreaInput.value);
+                    var R_H = parseFloat(hydradiusDisplay && hydradiusDisplay.textContent);
+                    var S = parseFloat(slopeInput && slopeInput.value);
+                    var pipeArea = parseFloat(areaDisplay && areaDisplay.textContent); // full pipe area
+                    
+                    // Validate inputs and highlight missing/invalid fields
+                    var hasError = false;
+                    if (!isFinite(C) || C <= 0){ if (roughnessInput && roughnessInput.classList) roughnessInput.classList.add('input-error'); hasError = true; }
+                    if (!isFinite(S) || S <= 0){ if (slopeInput && slopeInput.classList) slopeInput.classList.add('input-error'); hasError = true; }
+                    if (!isFinite(pipeArea) || pipeArea <= 0){ if (diameter && diameter.classList) diameter.classList.add('input-error'); hasError = true; }
+                    if (!isFinite(A) || A <= 0){ if (submergedAreaInput && submergedAreaInput.classList) submergedAreaInput.classList.add('input-error'); hasError = true; }
+                    if (!isFinite(R_H) || R_H <= 0){ if (submergedAreaInput && submergedAreaInput.classList) submergedAreaInput.classList.add('input-error'); if (wettedPerimeterInput && wettedPerimeterInput.classList) wettedPerimeterInput.classList.add('input-error'); hasError = true; }
+
+                    if (hasError){
+                        qDisplay.textContent = '—';
+                        vDisplay.textContent = '—';
+                        resultsSection.style.display = 'block';
+                        return;
+                    }
+
+                    // Calculate Q = k1 * C * A * R_H^0.63 * S^0.54
+                    var Q = k1Val * C * A * Math.pow(R_H, 0.63) * Math.pow(S, 0.54);
+                    
+                    // Calculate v = Q / pipeArea
+                    var v = Q / pipeArea;
+                    
+                    // Display results with units
+                    qDisplay.textContent = formatNumber(Q);
+                    vDisplay.textContent = formatNumber(v);
+                    
+                    if (unitType === 'us'){
+                        qUnit.textContent = 'ft³/sec';
+                        vUnit.textContent = 'ft/sec';
+                    } else {
+                        qUnit.textContent = 'm³/sec';
+                        vUnit.textContent = 'm/sec';
+                    }
+                    
+                    resultsSection.style.display = 'block';
+                    
+                    // briefly highlight the results
+                    qDisplay.style.transition = 'background-color 0.25s';
+                    qDisplay.style.backgroundColor = '#e9f7ef';
+                    setTimeout(function(){ qDisplay.style.backgroundColor = ''; }, 300);
+                    vDisplay.style.transition = 'background-color 0.25s';
+                    vDisplay.style.backgroundColor = '#e9f7ef';
+                    setTimeout(function(){ vDisplay.style.backgroundColor = ''; }, 300);
+                });
+            }
+
+            // Reset button: clear form and hide results
+            var resetBtn = qs('resetBtn');
+            if (resetBtn){
+                resetBtn.addEventListener('click', function(){
+                    // Clear all input fields
+                    if (diameter) diameter.value = '';
+                    if (roughnessInput) roughnessInput.value = '';
+                    if (submergedAreaInput) submergedAreaInput.value = '';
+                    if (wettedPerimeterInput) wettedPerimeterInput.value = '';
+                    if (slopeInput) slopeInput.value = '';
+                    // Reset auto-fill toggles
+                    if (autoSubmergedArea) autoSubmergedArea.checked = false;
+                    if (autoPerimeter) autoPerimeter.checked = false;
+                    // Clear error highlights
+                    [diameter, roughnessInput, submergedAreaInput, wettedPerimeterInput, slopeInput].forEach(function(el){ if (el && el.classList) el.classList.remove('input-error'); });
+                    // Clear displays
+                    if (areaDisplay) areaDisplay.textContent = '—';
+                    if (hydradiusDisplay) hydradiusDisplay.textContent = '—';
+                    // Hide results section
+                    if (resultsSection) resultsSection.style.display = 'none';
+                });
+            }
+
+            // initialize display
+            if (k1Info){
+                k1Info.textContent = (units && units.value === 'us') ? 'k1 = 1.318 (US customary)' : 'k1 = 0.849 (SI)';
+            }
+            try{ computeArea(); }catch(e){ /* ignore */ }
+
+            // Add input listeners to remove error highlighting when user edits
+            if (lengthInput) lengthInput.addEventListener('input', function(){ if (lengthInput.classList) lengthInput.classList.remove('input-error'); });
+            if (roughness2Input) roughness2Input.addEventListener('input', function(){ if (roughness2Input.classList) roughness2Input.classList.remove('input-error'); });
+            if (diamFeetInput) diamFeetInput.addEventListener('input', function(){ if (diamFeetInput.classList) diamFeetInput.classList.remove('input-error'); });
+            if (diamInInput) diamInInput.addEventListener('input', function(){ if (diamInInput.classList) diamInInput.classList.remove('input-error'); });
+            if (flowCFSInput) flowCFSInput.addEventListener('input', function(){ if (flowCFSInput.classList) flowCFSInput.classList.remove('input-error'); });
+            if (flowGPMInput) flowGPMInput.addEventListener('input', function(){ if (flowGPMInput.classList) flowGPMInput.classList.remove('input-error'); });
+
+            // Headloss Calculator Apply button
+            if (applyHeadlossBtn){
+                applyHeadlossBtn.addEventListener('click', function(){
+                    // Clear previous error highlights
+                    [lengthInput, roughness2Input, diamFeetInput, diamInInput, flowCFSInput, flowGPMInput].forEach(function(el){ if (el && el.classList) el.classList.remove('input-error'); });
+                    
+                    // Gather headloss inputs
+                    var L = parseFloat(lengthInput && lengthInput.value); // pipe length in feet
+                    var C = parseFloat(roughness2Input && roughness2Input.value); // roughness coefficient
+                    var D = parseFloat(diamFeetInput && diamFeetInput.value); // diameter in feet
+                    var Q_cfs = parseFloat(flowCFSInput && flowCFSInput.value); // flow in cfs
+                    
+                    // Validate inputs and highlight missing/invalid fields
+                    var hasError = false;
+                    if (!isFinite(L) || L <= 0){ if (lengthInput && lengthInput.classList) lengthInput.classList.add('input-error'); hasError = true; }
+                    if (!isFinite(C) || C <= 0){ if (roughness2Input && roughness2Input.classList) roughness2Input.classList.add('input-error'); hasError = true; }
+                    if (!isFinite(D) || D <= 0){ if (diamFeetInput && diamFeetInput.classList) diamFeetInput.classList.add('input-error'); hasError = true; }
+                    if (!isFinite(Q_cfs) || Q_cfs <= 0){ if (flowCFSInput && flowCFSInput.classList) flowCFSInput.classList.add('input-error'); hasError = true; }
+                    
+                    if (hasError){
+                        headlossFeetDisplay.textContent = '—';
+                        headlossPSIDisplay.textContent = '—';
+                        headlossResultsSection.style.display = 'block';
+                        return;
+                    }
+
+                    // Calculate headloss in feet using Hazen-Williams formula (US units)
+                    // h_f = 4.73 * L / (C^1.852 * D^4.87) * Q^1.852
+                    var h_f = 4.73 * L / (Math.pow(C, 1.852) * Math.pow(D, 4.87)) * Math.pow(Q_cfs, 1.852);
+                    
+                    // Convert headloss from feet to psi (1 psi = 2.31 feet of water)
+                    var h_psi = h_f / 2.31;
+                    
+                    // Display results
+                    headlossFeetDisplay.textContent = formatNumber(h_f);
+                    headlossPSIDisplay.textContent = formatNumber(h_psi);
+                    headlossResultsSection.style.display = 'block';
+                    
+                    // briefly highlight the results
+                    headlossFeetDisplay.style.transition = 'background-color 0.25s';
+                    headlossFeetDisplay.style.backgroundColor = '#e9f7ef';
+                    setTimeout(function(){ headlossFeetDisplay.style.backgroundColor = ''; }, 300);
+                    headlossPSIDisplay.style.transition = 'background-color 0.25s';
+                    headlossPSIDisplay.style.backgroundColor = '#e9f7ef';
+                    setTimeout(function(){ headlossPSIDisplay.style.backgroundColor = ''; }, 300);
+                });
+            }
+
+            // Headloss Reset button
+            if (resetHeadlossBtn){
+                resetHeadlossBtn.addEventListener('click', function(){
+                    if (lengthInput) lengthInput.value = '';
+                    if (roughness2Input) roughness2Input.value = '';
+                    if (diamFeetInput) diamFeetInput.value = '';
+                    if (diamInInput) diamInInput.value = '';
+                    if (flowCFSInput) flowCFSInput.value = '';
+                    if (flowGPMInput) flowGPMInput.value = '';
+                    if (headlossResultsSection) headlossResultsSection.style.display = 'none';
+                });
+            }
+        })();
+    </script>
+</body>
+</html>
